@@ -7,11 +7,11 @@ db = MySQLdb.connect(host = '*****',user = 'root',password= '********', db = '**
 cursor = db.cursor()
 
 connect = pymysql.Connect(  
-    host='rm-wz988to0p0a7js870o.mysql.rds.aliyuncs.com',  
+    host='******',  
     port=3306,  
-    user='root',  
-    passwd='zd45+3=48',  
-    db='ctrip_gengxin', 
+    user='******',  
+    passwd='*****',  
+    db='******', 
     use_unicode=1,
     charset='utf8'  
 )   
