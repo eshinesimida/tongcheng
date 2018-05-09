@@ -3,8 +3,7 @@ import time
 import re
 import pymysql  
 
-db = MySQLdb.connect(host = '*****',user = 'root',password= '********', db = '************' ,use_unicode=1,charset='utf8')
-cursor = db.cursor()
+
 
 connect = pymysql.Connect(  
     host='******',  
