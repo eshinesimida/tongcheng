@@ -14,24 +14,11 @@ connect = pymysql.Connect(
     use_unicode=1,
     charset='utf8'  
 )   
-#url = 'https://www.ly.com/scenery/AjaxHelper/DianPingAjax.aspx?action=GetDianPingList&sid=3556&page=2&pageSize=10&labId=1&sort=0&iid=0.7615521549189274'
-#url1= 'https://www.ly.com/scenery/AjaxHelper/DianPingAjax.aspx?action=GetDianPingList&sid=3556&page=1&pageSize=10&labId=6&sort=0&iid=0.2556579820259157'
-url_net = [
-        #'https://www.ly.com/scenery/AjaxHelper/DianPingAjax.aspx?action=GetDianPingList&sid=19466&page=1&pageSize=10&labId=6&sort=0&iid=0.6362413561168098',
-        #'https://www.ly.com/scenery/AjaxHelper/DianPingAjax.aspx?action=GetDianPingList&sid=18007&page=1&pageSize=10&labId=6&sort=0&iid=0.04777261337970473',
-        #'https://www.ly.com/scenery/AjaxHelper/DianPingAjax.aspx?action=GetDianPingList&sid=12851&page=1&pageSize=10&labId=6&sort=0&iid=0.6255524150197138'
-        'https://www.ly.com/scenery/AjaxHelper/DianPingAjax.aspx?action=GetDianPingList&sid=18738&page=1&pageSize=10&labId=6&sort=0&iid=0.7897820373766561',
-        'https://www.ly.com/scenery/AjaxHelper/DianPingAjax.aspx?action=GetDianPingList&sid=4510&page=1&pageSize=10&labId=6&sort=0&iid=0.42065800212812665',
-        'https://www.ly.com/scenery/AjaxHelper/DianPingAjax.aspx?action=GetDianPingList&sid=8109&page=1&pageSize=10&labId=6&sort=0&iid=0.9786362329833097',
-        'https://www.ly.com/scenery/AjaxHelper/DianPingAjax.aspx?action=GetDianPingList&sid=24621&page=1&pageSize=10&labId=6&sort=0&iid=0.8709899592908121',
-        'https://www.ly.com/scenery/AjaxHelper/DianPingAjax.aspx?action=GetDianPingList&sid=4037&page=1&pageSize=10&labId=6&sort=0&iid=0.0895729115312871',
-        'https://www.ly.com/scenery/AjaxHelper/DianPingAjax.aspx?action=GetDianPingList&sid=27448&page=1&pageSize=10&labId=6&sort=0&iid=0.7115398973537116',
-        'https://www.ly.com/scenery/AjaxHelper/DianPingAjax.aspx?action=GetDianPingList&sid=19501&page=1&pageSize=10&labId=6&sort=0&iid=0.9287208744417104',
-        'https://www.ly.com/scenery/AjaxHelper/DianPingAjax.aspx?action=GetDianPingList&sid=3387&page=1&pageSize=10&labId=6&sort=0&iid=0.671316653986964'
+headers = {'content-type': 'application/json',
+           'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:22.0) Gecko/20100101 Firefox/22.0'}
 
-        ]
 for url1 in url_net:
-    html1 = requests.post(url1)
+    html1 = requests.post(url1, headers = headers)
     pages = html1.json()['pageInfo']['totalPage']
     print(pages)
     urls = []
@@ -43,32 +30,40 @@ for url1 in url_net:
         urls.append(url)
     
     for k in range(pages):
-        html1 = requests.post(urls[k])
-        time.sleep(3)
-        for i in range(10):
-            content = html1.json()['dpList'][i]['dpContent']
-            content = re.sub(r"'", "", content)
-            time1 = html1.json()['dpList'][i]['dpDate']
-            jingdian = html1.json()['dpList'][i]['DPItemName']
-            user = html1.json()['dpList'][i]['dpUserName']
-            ID = html1.json()['dpList'][i]['dpId']
+        try:
+            html1 = requests.post(urls[k], headers=headers, timeout=5)
+            
+            for i in range(10):
+                content = html1.json()['dpList'][i]['dpContent']
+                content = re.sub(r"'", "", content)
+                time1 = html1.json()['dpList'][i]['dpDate']
+                jingdian = html1.json()['dpList'][i]['DPItemName']
+                user = html1.json()['dpList'][i]['dpUserName']
+                ID = html1.json()['dpList'][i]['dpId']
             #print(k)
             #print(user,ID,jingdian,time,content)
-            cursor = connect.cursor()  
-            sql = "INSERT IGNORE INTO tongchen (ID, user, jingdian, time, content) VALUES ( '%s', '%s', '%s', '%s', '%s' )"  
-            data = ( ID, user, jingdian, time1, content)
-            try:
-                cursor.execute(sql % data)
-            except:
-                print(ID)
+                cursor = connect.cursor()  
+                sql = "INSERT IGNORE INTO tongchen (ID, user, jingdian, time, content) VALUES ( '%s', '%s', '%s', '%s', '%s' )"  
+                data = ( ID, user, jingdian, time1, content)
+                try:
+                    cursor.execute(sql % data)
+                except:
+                    print(ID)
                 
-            connect.commit()
-        print(k)
+                connect.commit()
+            print(k)
+            print(jingdian)
+        except requests.exceptions.ConnectionError as e:
+            html1 = "No response"
+            continue
+        #html1 = requests.post(urls[k], headers = headers)
+        #time.sleep(3)
+        #s = requests.session()
+        #s.keep_alive = False
+        
         
   
 
 cursor.close()
-db.close() 
-    
-    
+db.close()    
     

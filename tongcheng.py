@@ -62,8 +62,6 @@ for url1 in url_net:
         #s.keep_alive = False
         
         
-  
-
 cursor.close()
 db.close()    
     
